@@ -216,7 +216,7 @@ func findFeatureIndex(deviceIdx byte, featureId uint16) (byte, error) {
 	lookupCommand[3] = softwareId
 	lookupCommand[4] = msb
 	lookupCommand[5] = lsb
-	log.Printf("Lookup request: % x\n", lookupCommand)
+	//log.Printf("Lookup request: % x\n", lookupCommand)
 	_, wErr := device.Write(lookupCommand)
 	if wErr != nil {
 		return 0x00, errors.Join(errors.New("failed to write lookup request"), wErr)
@@ -234,7 +234,7 @@ func findFeatureIndex(deviceIdx byte, featureId uint16) (byte, error) {
 			responded = true
 		}
 	}
-	log.Printf("Lookup response: % x\n", response)
+	//log.Printf("Lookup response: % x\n", response)
 	return response[4], nil
 }
 
