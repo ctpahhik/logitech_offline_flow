@@ -1,0 +1,29 @@
+name: Build Windows Binary (cgo)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    env:
+      CGO_ENABLED: 1
+      GOOS: windows
+      GOARCH: amd64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.3'
+
+      - name: Build Windows binary with cgo
+        run: go build -v -o logi_offline_flow.exe ./...
