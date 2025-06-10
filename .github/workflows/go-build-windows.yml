@@ -29,29 +29,21 @@ jobs:
         run: go build -v -o logi_offline_flow.exe ./...
 
       - name: Bump version and push tag
-        id: bump_version
-        uses: ansemjo/gh-action-bump-version@v1
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v1.4
         with:
-          tag-prefix: "v"
-          default: patch
-          commit-message: "chore(release): bump version to {{version}}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release_branches: main
+          default_bump: patch
 
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.bump_version.outputs.version }}
-          name: Release ${{ steps.bump_version.outputs.version }}
+          tag_name: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: |
-            Automated release for ${{ steps.bump_version.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release asset
-        uses: softprops/action-gh-release@v2
-        with:
+            Automated release for ${{ steps.tag_version.outputs.new_tag }}
           files: logi_offline_flow.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
