@@ -27,3 +27,31 @@ jobs:
 
       - name: Build Windows binary with cgo
         run: go build -v -o logi_offline_flow.exe ./...
+
+      - name: Bump version and push tag
+        id: bump_version
+        uses: ansemjo/gh-action-bump-version@v1
+        with:
+          tag-prefix: "v"
+          default: patch
+          commit-message: "chore(release): bump version to {{version}}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump_version.outputs.version }}
+          name: Release ${{ steps.bump_version.outputs.version }}
+          body: |
+            Automated release for ${{ steps.bump_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: logi_offline_flow.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
