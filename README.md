@@ -61,6 +61,7 @@ offline_logi_flow_sim.exe --devices=1,2 --left-channels=1,1
 - Clipboard sharing, drag-and-drop, or file transfer features are **not** and won't be implemented in the simulator.
 - Works only on Windows but Linux and/or macOs support may be added if needed.
 - Works properly only for the main screen in multimonitor setup
+- May not switch keyboard if it's in sleep mode when switch happend
 
 ## Contribution
 
