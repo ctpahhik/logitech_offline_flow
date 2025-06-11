@@ -45,13 +45,13 @@ B - A - C
 
 ```sh
 # Start on Host A (center)
-logi_offline_flow.exe --devices=1,2 --left-channels=0,0 --right-channels=2,2
+offline_logi_flow_sim.exe --devices=1,2 --left-channels=0,0 --right-channels=2,2
 
 # Start on Host B (left)
-logi_offline_flow.exe --devices=1,2 --right-channels=1,1
+offline_logi_flow_sim.exe --devices=1,2 --right-channels=1,1
 
 # Start on Host C (right)
-logi_offline_flow.exe --devices=1,2 --left-channels=1,1
+offline_logi_flow_sim.exe --devices=1,2 --left-channels=1,1
 ```
 
 - By moving your mouse cursor to the left edge of Host A’s screen control will switch to Host B, and vice versa, to the right edge of Host A’s screen, control will switch to Host C, and vice versa.
