@@ -1,4 +1,4 @@
-name: Build Windows Binary (cgo)
+name: Automatically Build Windows Binary (cgo) on any change
 
 on:
   workflow_dispatch:
