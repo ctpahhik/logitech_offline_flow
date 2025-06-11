@@ -44,15 +44,15 @@ jobs:
           release_branches: main
           default_bump: patch
 
-      - name: Create GitHub Release
-        id: create_release
+      - name: Create GitHub Draft Release
+        id: create_draft_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          name: Snapshot ${{ steps.tag_version.outputs.new_tag }}
           draft: true
           body: |
-            Automated release for ${{ steps.tag_version.outputs.new_tag }}
+            Automated snapshot for ${{ steps.tag_version.outputs.new_tag }}
           files: offline_logi_flow_sim.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
