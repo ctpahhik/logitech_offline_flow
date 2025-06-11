@@ -26,7 +26,7 @@ jobs:
           go-version: '1.24.3'
 
       - name: Build Windows binary with cgo
-        run: go build -v -o logi_offline_flow.exe ./...
+        run: go build -v -o offline_logi_flow_sim.exe ./...
 
       - name: Bump version and push tag
         id: tag_version
@@ -44,6 +44,6 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: |
             Automated release for ${{ steps.tag_version.outputs.new_tag }}
-          files: logi_offline_flow.exe
+          files: offline_logi_flow_sim.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
