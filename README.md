@@ -26,7 +26,7 @@ There is also small delay before next switch for the same reason.
 
 ## Usage
 
-1. **Install** No installation required. Build / download the tool on all participating hosts and that's it.
+1. **Copy** No installation required. Build / download the tool on all participating hosts and that's it.
 2. **Start** the tool on each host, provide device indexes and target channels for the left and/or right edges
 4. **Move** your mouse to the edge of your screen to switch control to another host!
 5. **Hotkey** Press Ctrl+Shift+W to enable/disable automatic switching
