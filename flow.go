@@ -289,6 +289,9 @@ func main() {
 
 	parseArgs()
 
+	width, _, _ := procSystemMetrics.Call(C.SM_CXSCREEN)
+	rightBorder = int(width)
+
 	go func() {
 		C.SetMouseHook()
 	}()
