@@ -9,7 +9,7 @@ Can be used instead of Logitech Flow when there is no direct network connection 
 ## Features
 
 - **Automatic Device Switching:** Instantly move your mouse pointer to the edge of one screen to control another computer.
-- **Universal:** Should support any multihost Logi Bolt device in both Receiver and Bluetooth modes. Tested only for **MX Master 3S** Mouse and **K950** Keyboard.
+- **Universal:** Should support any multihost Logi Bolt device in both Receiver and Bluetooth modes. Tested only with **MX Master 3S** Mouse and **K950** Keyboard.
 - **Lightweight:** Minimal dependencies, fast startup.
 
 ## TODOs
@@ -36,7 +36,8 @@ There is also small delay before next switch for the same reason.
 **--devices=...** (mandatory) coma separated list of indexes of Logitech devices paired with the host. Usually index is the same as paired device position in any Logitech tool. Standard receiver support up to 6 devices (indexes 1-6) so if you don't know the index you can try all of them.<br>
 **--left-channels=...** (optional) coma separated list of devices' channels paired with the receiver to be switched to when pointer touches left edge of the screen. Must be in the same order as devices.<br>
 **--right-channels=...** (optional) coma separated list of devices' channels paired with the receiver to be switched to when pointer touches right edge of the screen. Must be in the same order as devices.<br>
-At least one --left-channels or --right-channels must be provided.
+<br>
+At least one **--left-channels** or **--right-channels** must be provided.
 
 ## Example
 
@@ -53,8 +54,8 @@ offline_logi_flow_sim.exe --devices=1,2 --right-channels=1,1
 # Start on Host C (right)
 offline_logi_flow_sim.exe --devices=1,2 --left-channels=1,1
 ```
-
-- By moving your mouse cursor to the left edge of Host A’s screen control will switch to Host B, and vice versa, to the right edge of Host A’s screen, control will switch to Host C, and vice versa.
+<br>
+By moving your mouse cursor to the left edge of Host A’s screen control will switch to Host B, and vice versa, to the right edge of Host A’s screen, control will switch to Host C, and vice versa.
 
 ## Limitations
 
