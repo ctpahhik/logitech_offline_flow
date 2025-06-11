@@ -4,9 +4,17 @@ on:
   workflow_dispatch:
   push:
     branches: [ master ]
+    paths:
+      - 'lib/**'
+      - '*.go'
+      - 'go.*'
   pull_request:
     branches: [ master ]
-
+    paths:
+      - 'lib/**'
+      - '*.go'
+      - 'go.*'
+      
 jobs:
   build-windows:
     runs-on: windows-latest
