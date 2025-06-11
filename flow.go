@@ -165,6 +165,10 @@ func parseArgs() {
 	fmt.Println("Left Channels: ", leftChannels)
 	fmt.Println("Right Channels: ", rightChannels)
 
+	if len(deviceIds) == 0 {
+		log.Fatalln("Device list must be provided")
+	}
+
 	for idx, dev := range deviceIds {
 		if idx < len(leftChannels) {
 			ch := leftChannels[idx]
@@ -187,7 +191,7 @@ func parseArgs() {
 	}
 
 	if len(commandsLeft) == 0 && len(commandsRight) == 0 {
-		log.Fatalln("No channels configured")
+		log.Fatalln("No left or right channels configured")
 	}
 
 	logCommands("Left Commands", commandsLeft)
