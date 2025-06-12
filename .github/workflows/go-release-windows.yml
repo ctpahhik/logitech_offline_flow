@@ -1,19 +1,7 @@
-name: Automatically Build Windows Binary (cgo) on any change
+name: Build and release Windows Binary (cgo)
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ master ]
-    paths:
-      - 'lib/**'
-      - '*.go'
-      - 'go.*'
-  pull_request:
-    branches: [ master ]
-    paths:
-      - 'lib/**'
-      - '*.go'
-      - 'go.*'
       
 jobs:
   build-windows:
@@ -44,15 +32,14 @@ jobs:
           release_branches: main
           default_bump: patch
 
-      - name: Create GitHub Draft Release
-        id: create_draft_release
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          name: Snapshot ${{ steps.tag_version.outputs.new_tag }}
-          draft: true
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: |
-            Automated snapshot for ${{ steps.tag_version.outputs.new_tag }}
+            Automated release for ${{ steps.tag_version.outputs.new_tag }}
           files: offline_logi_flow_sim.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
