@@ -28,11 +28,12 @@ static int SetMouseHook() {
     return 0;
 }
 
-static void RegisterEnabledHotKey() {
-}
+/*static void RegisterEnabledHotKey() {
+}*/
 
-static void UnregisterEnabledHotKey() {
-}
+/*static void UnregisterEnabledHotKey() {
+}*/
 
+/*
 static void MoveMouse() {
-}
+}*/

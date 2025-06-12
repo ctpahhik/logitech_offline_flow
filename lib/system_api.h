@@ -4,10 +4,10 @@
 
 static int SetMouseHook();
 
-static void RegisterEnabledHotKey();
+//static void RegisterEnabledHotKey();
 
-static void UnregisterEnabledHotKey();
+//static void UnregisterEnabledHotKey();
 
-static void MoveMouse();
+//static void MoveMouse();
 
 #endif

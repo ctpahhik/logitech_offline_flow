@@ -79,7 +79,7 @@ var device hid.Device
 var commandsLeft = [][]byte{}
 var commandsRight = [][]byte{}
 var lastSwitched = time.Now()
-var switchThreshold, _ = time.ParseDuration("2s")
+var switchThreshold, _ = time.ParseDuration("1500ms")
 var user32 = syscall.NewLazyDLL("user32.dll")
 var procSendInput = user32.NewProc("SendInput")
 var procSystemMetrics = user32.NewProc("GetSystemMetrics")
@@ -87,10 +87,23 @@ var leftBorder = 0
 var rightBorder = 0
 var enabled = true
 var offline = true
+var logLevel = 1
 
 func OnHotKey() {
 	enabled = !enabled
 	fmt.Printf("Enabled: %v\n", enabled)
+}
+
+func Log(level int, messages ...any) {
+	if level <= logLevel {
+		log.Println(messages...)
+	}
+}
+
+func Logf(level int, format string, params ...any) {
+	if level <= logLevel {
+		log.Printf(format, params...)
+	}
 }
 
 //export OnMouseMove
@@ -101,19 +114,19 @@ func OnMouseMove(x C.int, y C.int) {
 		return
 	}
 	if offline {
-		log.Println("Back online")
+		Log(2, "Back online")
 		lastSwitched = time.Now()
 		offline = false
 	}
 	if xPos <= leftBorder {
-		log.Printf("Switching to the left\n")
+		Log(2, "Switching to the left")
 		onSwitch()
 		for _, command := range commandsLeft {
 			SwitchHost(command)
 		}
 		MoveMouse(leftBorder+100, 0)
 	} else if xPos >= rightBorder {
-		log.Printf("Switching to the right\n")
+		Log(2, "Switching to the right")
 		onSwitch()
 		for _, command := range commandsRight {
 			SwitchHost(command)
@@ -130,7 +143,7 @@ func onSwitch() {
 func SwitchHost(command []byte) {
 	_, err := device.Write(command)
 	if err != nil {
-		log.Printf("Unable to send command [%s] to the Device: %v\n", command, err)
+		Log(1, fmt.Sprintf("Unable to send command [%s] to the Device: %v\n", command, err))
 	}
 }
 
@@ -171,11 +184,12 @@ func parseArgs() {
 	flag.Var(&deviceIds, "devices", "Comma-separated list of local device indexes")
 	flag.Var(&leftChannels, "left-channels", "Comma-separated list of channels for devices on the left of current")
 	flag.Var(&rightChannels, "right-channels", "Comma-separated list of channels for devices on the right of current")
+	flag.IntVar(&logLevel, "log-level", 1, "Log Level, higher number - more details. 0 - silence. Default 1")
 	flag.Parse()
 
-	fmt.Println("Devices: ", deviceIds)
-	fmt.Println("Left Channels: ", leftChannels)
-	fmt.Println("Right Channels: ", rightChannels)
+	Log(1, "Devices: ", deviceIds)
+	Log(1, "Left Channels: ", leftChannels)
+	Log(1, "Right Channels: ", rightChannels)
 
 	if len(deviceIds) == 0 {
 		log.Fatalln("Device list must be provided")
@@ -186,7 +200,7 @@ func parseArgs() {
 			ch := leftChannels[idx]
 			cmd, err := buildChangeHostCommand(dev, ch)
 			if err != nil {
-				log.Printf("Unable to build Change Host Command for the Device %v: %v\n", dev, err)
+				Logf(1, "Unable to build Change Host Command for the Device %v: %v\n", dev, err)
 			} else {
 				commandsLeft = append(commandsLeft, cmd)
 			}
@@ -195,7 +209,7 @@ func parseArgs() {
 			ch := rightChannels[idx]
 			cmd, err := buildChangeHostCommand(dev, ch)
 			if err != nil {
-				log.Printf("Unable to build Change Host Command for the Device %v: %v\n", dev, err)
+				Logf(1, "Unable to build Change Host Command for the Device %v: %v\n", dev, err)
 			} else {
 				commandsRight = append(commandsRight, cmd)
 			}
@@ -218,7 +232,7 @@ func logCommands(header string, commands [][]byte) {
 	for _, cmd := range commands {
 		message = message + fmt.Sprintf("\t[% x]\n", cmd)
 	}
-	log.Printf("%s: [\n%s]\n", header, message)
+	Logf(1, "%s: [\n%s]\n", header, message)
 }
 
 // see ./references/x0000_root_v2.pdf
@@ -232,7 +246,7 @@ func findFeatureIndex(deviceIdx byte, featureId uint16) (byte, error) {
 	lookupCommand[3] = softwareId
 	lookupCommand[4] = msb
 	lookupCommand[5] = lsb
-	//log.Printf("Lookup request: % x\n", lookupCommand)
+	Logf(2, "Lookup request: % x\n", lookupCommand)
 	_, wErr := device.Write(lookupCommand)
 	if wErr != nil {
 		return 0x00, errors.Join(errors.New("failed to write lookup request"), wErr)
@@ -243,14 +257,14 @@ func findFeatureIndex(deviceIdx byte, featureId uint16) (byte, error) {
 	for !responded {
 		rn, rErr := device.ReadTimeout(response, 3000)
 		if rErr != nil || rn < 5 {
-			log.Printf("last read: [% x] header not as expected: [% x]", response, lookupCommand[:4])
+			Logf(1, "last read: [% x] header not as expected: [% x]", response, lookupCommand[:4])
 			return 0x00, errors.Join(errors.New("failed to read lookup response"), rErr)
 		}
 		if reflect.DeepEqual(lookupCommand[:4], response[:4]) {
 			responded = true
 		}
 	}
-	//log.Printf("Lookup response: % x\n", response)
+	Logf(2, "Lookup response: % x\n", response)
 	return response[4], nil
 }
 
@@ -285,16 +299,16 @@ func main() {
 	for _, deviceInfo := range devicesInfos {
 		if deviceInfo.Usage == usage && deviceInfo.UsagePage == page {
 			dev, err := deviceInfo.Open()
-			fmt.Printf("Opened: %+v\n", deviceInfo)
 			if err != nil {
-				log.Fatalf("Failed to open device: %v\n", err)
+				Logf(1, "Failed to open device: %v\n", err)
 			} else {
+				Logf(1, "Opened: %+v\n", deviceInfo)
 				device = dev
 			}
 			defer func(dev hid.Device) {
 				err := dev.Close()
 				if err != nil {
-					log.Printf("Failed to close device: %v\n", err)
+					Logf(1, "Failed to close device: %v\n", err)
 				}
 			}(dev)
 			break
@@ -315,7 +329,7 @@ func main() {
 
 	ok := C.RegisterHotKey(nil, C.int(hotkeyID), C.MOD_CONTROL|C.MOD_SHIFT, C.VK_W)
 	if ok == 0 {
-		log.Fatal("Failed to register hotkey")
+		Log(1, "Failed to register hotkey")
 	}
 	defer C.UnregisterHotKey(nil, C.int(hotkeyID))
 
@@ -324,7 +338,7 @@ func main() {
 		for {
 			ret := C.GetMessageW(&msg, nil, 0, 0)
 			if ret == -1 {
-				log.Println("Error in GetMessage")
+				Log(1, "Error in Hot Key GetMessage")
 			} else if msg.message == C.WM_HOTKEY && msg.wParam == hotkeyID {
 				OnHotKey()
 			}
