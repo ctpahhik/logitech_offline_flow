@@ -38,6 +38,7 @@ jobs:
         with:
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
+          draft: false
           body: |
             Automated release for ${{ steps.tag_version.outputs.new_tag }}
           files: offline_logi_flow_sim.exe
