@@ -79,13 +79,14 @@ var device hid.Device
 var commandsLeft = [][]byte{}
 var commandsRight = [][]byte{}
 var lastSwitched = time.Now()
-var SwitchThreshold, _ = time.ParseDuration("1000ms")
+var switchThreshold, _ = time.ParseDuration("2s")
 var user32 = syscall.NewLazyDLL("user32.dll")
 var procSendInput = user32.NewProc("SendInput")
 var procSystemMetrics = user32.NewProc("GetSystemMetrics")
 var leftBorder = 0
 var rightBorder = 0
 var enabled = true
+var offline = true
 
 func OnHotKey() {
 	enabled = !enabled
@@ -96,23 +97,34 @@ func OnHotKey() {
 func OnMouseMove(x C.int, y C.int) {
 	xPos := int(x)
 	//log.Printf("Mouse moved to: X=%d, Y=%d\n", int(x), int(y))
-	if enabled && lastSwitched.Add(SwitchThreshold).Before(time.Now()) {
-		if xPos <= leftBorder {
-			//log.Printf("Switching to the left\n")
-			for _, command := range commandsLeft {
-				SwitchHost(command)
-			}
-			MoveMouse(leftBorder+100, 0)
-			lastSwitched = time.Now()
-		} else if xPos >= rightBorder {
-			//log.Printf("Switching to the right\n")
-			for _, command := range commandsRight {
-				SwitchHost(command)
-			}
-			MoveMouse(rightBorder-100, 0)
-			lastSwitched = time.Now()
-		}
+	if !enabled || lastSwitched.Add(switchThreshold).After(time.Now()) {
+		return
 	}
+	if offline {
+		log.Println("Back online")
+		lastSwitched = time.Now()
+		offline = false
+	}
+	if xPos <= leftBorder {
+		log.Printf("Switching to the left\n")
+		onSwitch()
+		for _, command := range commandsLeft {
+			SwitchHost(command)
+		}
+		MoveMouse(leftBorder+100, 0)
+	} else if xPos >= rightBorder {
+		log.Printf("Switching to the right\n")
+		onSwitch()
+		for _, command := range commandsRight {
+			SwitchHost(command)
+		}
+		MoveMouse(rightBorder-100, 0)
+	}
+}
+
+func onSwitch() {
+	lastSwitched = time.Now()
+	offline = true
 }
 
 func SwitchHost(command []byte) {
@@ -209,7 +221,7 @@ func logCommands(header string, commands [][]byte) {
 	log.Printf("%s: [\n%s]\n", header, message)
 }
 
-// https://drive.google.com/file/d/1ULmw9uJL8b8iwwUo5xjSS9F5Zvno-86y/view
+// see ./references/x0000_root_v2.pdf
 func findFeatureIndex(deviceIdx byte, featureId uint16) (byte, error) {
 	msb := byte(featureId >> 8)
 	lsb := byte(featureId & 0xFF)
@@ -242,6 +254,7 @@ func findFeatureIndex(deviceIdx byte, featureId uint16) (byte, error) {
 	return response[4], nil
 }
 
+// see ./references/logitech_hidpp_2.0_specification_draft_2012-06-04.pdf
 func buildCommand(deviceIdx byte, featureId uint16, function byte, params []byte) ([]byte, error) {
 	if params == nil || len(params) > commandLength-4 {
 		return nil, errors.New("params is too big")
@@ -261,7 +274,7 @@ func buildCommand(deviceIdx byte, featureId uint16, function byte, params []byte
 	return result, nil
 }
 
-// https://drive.google.com/file/d/1EMHfOJwXikGdJfdYIa0v1a50EVV9Qb8N/view
+// see ./references/x1814_change_host_v0.pdf
 func buildChangeHostCommand(deviceIdx byte, targetHost byte) ([]byte, error) {
 	return buildCommand(deviceIdx, switchHostFeatureId, switchHostFunction, []byte{targetHost})
 }
