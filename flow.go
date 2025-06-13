@@ -79,7 +79,8 @@ var device hid.Device
 var commandsLeft = [][]byte{}
 var commandsRight = [][]byte{}
 var lastSwitched = time.Now()
-var switchThreshold, _ = time.ParseDuration("1500ms")
+var forwardThreshold, _ = time.ParseDuration("1500ms")
+var backwardThreshold, _ = time.ParseDuration("500ms")
 var user32 = syscall.NewLazyDLL("user32.dll")
 var procSendInput = user32.NewProc("SendInput")
 var procSystemMetrics = user32.NewProc("GetSystemMetrics")
@@ -110,7 +111,7 @@ func Logf(level int, format string, params ...any) {
 func OnMouseMove(x C.int, y C.int) {
 	xPos := int(x)
 	//log.Printf("Mouse moved to: X=%d, Y=%d\n", int(x), int(y))
-	if !enabled || lastSwitched.Add(switchThreshold).After(time.Now()) {
+	if !enabled || lastSwitched.Add(backwardThreshold).After(time.Now()) {
 		return
 	}
 	if offline {
@@ -118,7 +119,7 @@ func OnMouseMove(x C.int, y C.int) {
 		lastSwitched = time.Now()
 		offline = false
 	}
-	if xPos <= leftBorder {
+	if xPos <= leftBorder && lastSwitched.Add(forwardThreshold).Before(time.Now()) {
 		Log(2, "Switching to the left")
 		onSwitch()
 		for _, command := range commandsLeft {
